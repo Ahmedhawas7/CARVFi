@@ -34,7 +34,7 @@ body {
   min-height: 100vh;
 }
 
-/* Auth Background - شاشة الترحيب */
+/* Auth Background - Welcome Screen */
 .auth-background {
   position: fixed;
   top: 0;
@@ -91,19 +91,185 @@ body {
   transform: translateY(-2px);
 }
 
-/* Modal Overlay - تأكد من أن ال modal بيكون فوق كل حاجة */
+/* Modal Overlay - Ensure modal is on top of everything */
 .modal-overlay {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background: rgba(0, 0, 0, 0.8) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  z-index: 10000 !important;
-  backdrop-filter: blur(10px) !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(10px);
+}
+
+.modal-content {
+  background: var(--glass);
+  backdrop-filter: blur(30px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow: hidden;
+  z-index: 10001;
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: var(--glass);
+  color: var(--text-primary);
+}
+
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 1rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--glass);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.wallet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.wallet-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.wallet-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass);
+  border-radius: 10px;
+}
+
+.wallet-info {
+  flex: 1;
+}
+
+.wallet-info h3 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.wallet-info p {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.btn-connect {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 80px;
+}
+
+.btn-connect:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.btn-connect:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.disclaimer {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
 }
 
 /* Header */
@@ -235,9 +401,9 @@ body {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
+  display: block;
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Cards */
@@ -762,6 +928,21 @@ input::placeholder {
     gap: 1rem;
     text-align: center;
   }
+
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .wallet-option {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.8rem;
+  }
+  
+  .wallet-info {
+    text-align: center;
+  }
 }
 
 /* Scrollbar */
@@ -791,7 +972,7 @@ input::placeholder {
 
 /* Safe guards for content visibility */
 .app > *:not(.modal-overlay) {
-  display: block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  }
