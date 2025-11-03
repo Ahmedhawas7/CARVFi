@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// بدائل للأيقونات باستخدام SVG مباشرة
+// بدائل SVG للأيقونات
 const SendIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -77,7 +77,6 @@ const AIChat = () => {
       setNewMessage('');
       setIsLoading(true);
 
-      // محاكاة استجابة AI
       setTimeout(() => {
         const aiMessage = {
           id: (Date.now() + 1).toString(),
@@ -94,7 +93,6 @@ const AIChat = () => {
 
   return (
     <div className="flex flex-col h-[70vh] bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
-      {/* Header */}
       <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-4 border-b border-gray-700">
         <div className="flex items-center space-x-3 space-x-reverse">
           <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -107,7 +105,6 @@ const AIChat = () => {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 bg-gray-800">
         {messages.map((message) => (
           <div
@@ -161,7 +158,6 @@ const AIChat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <form onSubmit={handleSendMessage} className="p-4 bg-gray-800 border-t border-gray-700">
         <div className="flex items-center space-x-2 space-x-reverse">
           <button type="button" className="p-2 text-gray-400 hover:text-blue-400 transition-colors">
