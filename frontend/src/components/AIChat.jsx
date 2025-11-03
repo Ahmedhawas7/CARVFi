@@ -164,23 +164,25 @@ const AIChat = ({ user, onClose }) => {
   ];
 
   return (
-    <div className="ai-chat-container">
-      <div className="ai-chat-header">
+    <div className="ai-chat-wrapper">
+      {/* Header ثابت خارج المحادثة */}
+      <div className="ai-chat-header-fixed">
         <div className="ai-header-info">
           <h3>🤖 CARVFi AI Assistant</h3>
-          <span className="ai-status">Online • Type /help for commands</span>
+          <span className="ai-status">Online • Ready to help</span>
         </div>
-        <div className="ai-header-actions">
-          <button className="btn btn-clear" onClick={clearChat} title="Clear chat history">
-            🧹 Clear
+        <div className="ai-header-actions-fixed">
+          <button className="btn btn-clear-fixed" onClick={clearChat} title="Clear chat history">
+            🧹 Clear Chat
           </button>
-          <button className="btn btn-close" onClick={onClose} title="Close chat">
+          <button className="btn btn-close-fixed" onClick={onClose} title="Close chat">
             ✕ Close
           </button>
         </div>
       </div>
 
-      <div className="ai-chat-messages" ref={messagesContainerRef}>
+      {/* منطقة المحادثة الرئيسية */}
+      <div className="ai-chat-container-fixed" ref={messagesContainerRef}>
         {messages.map(message => (
           <div key={message.id} className={`message ${message.sender}`}>
             <div className="message-content">
@@ -212,9 +214,8 @@ const AIChat = ({ user, onClose }) => {
                   className="reply-btn"
                   onClick={() => {
                     setInputMessage(reply);
-                    // التركيز على حقل الإدخال بعد اختيار رد سريع
                     setTimeout(() => {
-                      document.querySelector('.ai-chat-input input')?.focus();
+                      document.querySelector('.ai-chat-input-fixed input')?.focus();
                     }, 100);
                   }}
                   disabled={isLoading}
@@ -229,7 +230,8 @@ const AIChat = ({ user, onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="ai-chat-input">
+      {/* Input ثابت خارج المحادثة */}
+      <div className="ai-chat-input-fixed">
         <input
           type="text"
           value={inputMessage}
@@ -240,7 +242,7 @@ const AIChat = ({ user, onClose }) => {
           autoFocus
         />
         <button 
-          className="btn btn-send"
+          className="btn btn-send-fixed"
           onClick={handleSendMessage}
           disabled={isLoading || !inputMessage.trim()}
         >
