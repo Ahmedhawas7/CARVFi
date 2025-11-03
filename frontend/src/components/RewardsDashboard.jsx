@@ -1,210 +1,79 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react';
 
-const RewardsDashboard = ({ account, contracts }) => {
-  const [rewards, setRewards] = useState([])
-  const [totalPoints, setTotalPoints] = useState(0)
-  const [activities, setActivities] = useState([])
+const RewardsDashboard = ({ user }) => {
+  const [rewards] = useState([
+    { id: 1, type: 'ai_chat', points: 10, description: 'AI Chat Session', claimed: true },
+    { id: 2, type: 'profile', points: 5, description: 'Profile Update', claimed: true },
+    { id: 3, type: 'wallet', points: 25, description: 'Wallet Connection', claimed: true },
+    { id: 4, type: 'social', points: 15, description: 'Social Interaction', claimed: false },
+    { id: 5, type: 'nft', points: 50, description: 'NFT Display', claimed: false }
+  ]);
 
-  useEffect(() => {
-    loadRewardsData()
-  }, [account])
-
-  const loadRewardsData = async () => {
-    // بيانات تجريبية
-    const mockRewards = [
-      { id: 1, amount: 10, activityType: 'ai_chat', timestamp: Date.now() - 3600000, claimed: true },
-      { id: 2, amount: 5, activityType: 'profile_update', timestamp: Date.now() - 7200000, claimed: true },
-      { id: 3, amount: 15, activityType: 'social_post', timestamp: Date.now() - 10800000, claimed: false },
-      { id: 4, amount: 25, activityType: 'referral', timestamp: Date.now() - 14400000, claimed: false },
-      { id: 5, amount: 50, activityType: 'bug_report', timestamp: Date.now() - 18000000, claimed: false }
-    ]
-
-    const mockActivities = [
-      { id: 1, type: 'ai_chat', points: 10, description: 'محادثة مع المساعد AI', timestamp: Date.now() - 3600000 },
-      { id: 2, type: 'profile_update', points: 5, description: 'تحديث البروفيل', timestamp: Date.now() - 7200000 },
-      { id: 3, type: 'social_post', points: 15, description: 'منشور اجتماعي', timestamp: Date.now() - 10800000 },
-      { id: 4, type: 'referral', points: 25, description: 'إحالة صديق', timestamp: Date.now() - 14400000 },
-      { id: 5, type: 'bug_report', points: 50, description: 'الإبلاغ عن ثغرة', timestamp: Date.now() - 18000000 }
-    ]
-
-    setRewards(mockRewards)
-    setActivities(mockActivities)
-    setTotalPoints(mockRewards.reduce((sum, reward) => sum + reward.amount, 0))
-  }
-
-  const handleClaimReward = async (rewardId) => {
-    try {
-      console.log('Claiming reward:', rewardId)
-      // TODO: استدعاء العقد للمطالبة بالمكافأة
-      alert(`تم المطالبة بالمكافأة #${rewardId}`)
-    } catch (error) {
-      console.error('Error claiming reward:', error)
-      alert('خطأ في المطالبة بالمكافأة')
-    }
-  }
-
-  const handleReportBug = async () => {
-    const bugDescription = prompt('صف الثغرة التي وجدتها:')
-    if (bugDescription) {
-      try {
-        // TODO: استدعاء العقد للإبلاغ عن الثغرة
-        console.log('Bug reported:', bugDescription)
-        alert('شكراً للإبلاغ! سيتم تحليل الثغرة ومكافأتك إذا كانت حقيقية.')
-      } catch (error) {
-        console.error('Error reporting bug:', error)
-      }
-    }
-  }
-
-  const getActivityIcon = (type) => {
-    const icons = {
-      'ai_chat': '🤖',
-      'profile_update': '👤',
-      'social_post': '💬',
-      'referral': '👥',
-      'bug_report': '🐛'
-    }
-    return icons[type] || '🎯'
-  }
+  const totalPoints = rewards.reduce((sum, reward) => sum + reward.points, 0);
+  const claimedPoints = rewards.filter(r => r.claimed).reduce((sum, reward) => sum + reward.points, 0);
 
   return (
     <div className="grid">
-      {/* إحصائيات النقاط */}
       <div className="card">
         <div className="stats">
           <div className="stat">
             <div className="stat-value">{totalPoints}</div>
-            <div className="stat-label">إجمالي النقاط</div>
+            <div className="stat-label">Total Points</div>
           </div>
           <div className="stat">
-            <div className="stat-value">
-              {rewards.filter(r => !r.claimed).length}
-            </div>
-            <div className="stat-label">مكافآت قابلة للصرف</div>
+            <div className="stat-value">{claimedPoints}</div>
+            <div className="stat-label">Claimed</div>
           </div>
           <div className="stat">
-            <div className="stat-value">{rewards.length}</div>
-            <div className="stat-label">إجمالي المكافآت</div>
+            <div className="stat-value">{rewards.filter(r => !r.claimed).length}</div>
+            <div className="stat-label">Pending</div>
           </div>
         </div>
       </div>
 
-      {/* المكافآت القابلة للصرف */}
       <div className="card">
-        <h3>🏆 المكافآت القابلة للصرف</h3>
-        <div style={{ marginTop: '15px' }}>
-          {rewards.filter(reward => !reward.claimed).length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#666', fontStyle: 'italic' }}>
-              لا توجد مكافآت قابلة للصرف حالياً
-            </p>
-          ) : (
-            rewards.filter(reward => !reward.claimed).map(reward => (
-              <div key={reward.id} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '15px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                marginBottom: '10px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span style={{ fontSize: '20px' }}>
-                    {getActivityIcon(reward.activityType)}
-                  </span>
-                  <div>
-                    <div style={{ fontWeight: 'bold' }}>
-                      {reward.amount} نقطة
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      {reward.activityType === 'ai_chat' && 'محادثة AI'}
-                      {reward.activityType === 'profile_update' && 'تحديث البروفيل'}
-                      {reward.activityType === 'social_post' && 'منشور اجتماعي'}
-                      {reward.activityType === 'referral' && 'إحالة صديق'}
-                      {reward.activityType === 'bug_report' && 'الإبلاغ عن ثغرة'}
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  className="btn"
-                  onClick={() => handleClaimReward(reward.id)}
-                  style={{ padding: '8px 15px', fontSize: '14px' }}
-                >
-                  صرف
-                </button>
+        <h3>Available Rewards</h3>
+        <div className="rewards-list">
+          {rewards.filter(reward => !reward.claimed).map(reward => (
+            <div key={reward.id} className="reward-item">
+              <div className="reward-icon">
+                {reward.type === 'ai_chat' && '🤖'}
+                {reward.type === 'profile' && '👤'}
+                {reward.type === 'wallet' && '🔗'}
+                {reward.type === 'social' && '💬'}
+                {reward.type === 'nft' && '🖼️'}
               </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* الأنشطة الأخيرة */}
-      <div className="card">
-        <h3>📊 الأنشطة الأخيرة</h3>
-        <div style={{ marginTop: '15px' }}>
-          {activities.map(activity => (
-            <div key={activity.id} style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px',
-              borderBottom: '1px solid #f0f0f0'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '18px' }}>
-                  {getActivityIcon(activity.type)}
-                </span>
-                <div>
-                  <div style={{ fontWeight: 'bold' }}>
-                    {activity.description}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>
-                    {new Date(activity.timestamp).toLocaleDateString('ar-EG')}
-                  </div>
-                </div>
+              <div className="reward-info">
+                <div className="reward-title">{reward.description}</div>
+                <div className="reward-points">+{reward.points} points</div>
               </div>
-              <div style={{ 
-                background: 'var(--success)', 
-                color: 'white', 
-                padding: '4px 8px', 
-                borderRadius: '12px',
-                fontSize: '12px',
-                fontWeight: 'bold'
-              }}>
-                +{activity.points}
-              </div>
+              <button className="btn btn-claim">Claim</button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* الإبلاغ عن الثغرات */}
       <div className="card">
-        <h3>🐛 الإبلاغ عن الثغرات</h3>
-        <p style={{ marginBottom: '15px', color: '#666' }}>
-          ساعدنا في تحسين المنصة وأحصل على مكافآت تصل إلى 50 نقطة
-        </p>
-        <button 
-          className="btn"
-          onClick={handleReportBug}
-          style={{ width: '100%' }}
-        >
-          الإبلاغ عن ثغرة
-        </button>
-        
-        <div style={{ marginTop: '20px', padding: '15px', background: '#fff3cd', borderRadius: '8px' }}>
-          <h4>🎯 كيف تكسب نقاط أكثر؟</h4>
-          <ul style={{ marginTop: '10px', paddingLeft: '20px' }}>
-            <li>محادثة AI: 10 نقاط</li>
-            <li>تحديث البروفيل: 5 نقاط</li>
-            <li>منشور اجتماعي: 15 نقطة</li>
-            <li>إحالة صديق: 25 نقطة</li>
-            <li>الإبلاغ عن ثغرة: حتى 50 نقطة</li>
-          </ul>
+        <h3>Reward History</h3>
+        <div className="history-list">
+          {rewards.filter(reward => reward.claimed).map(reward => (
+            <div key={reward.id} className="history-item">
+              <div className="history-icon">
+                {reward.type === 'ai_chat' && '🤖'}
+                {reward.type === 'profile' && '👤'}
+                {reward.type === 'wallet' && '🔗'}
+              </div>
+              <div className="history-info">
+                <div className="history-title">{reward.description}</div>
+                <div className="history-date">2 days ago</div>
+              </div>
+              <div className="history-points">+{reward.points}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default RewardsDashboard
+export default RewardsDashboard;
