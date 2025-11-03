@@ -396,3 +396,49 @@ input::placeholder {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-dark);
 }
+
+/* تأكد من أن الـ modal بيكون فوق كل حاجة */
+.modal-overlay {
+  z-index: 10000 !important;
+}
+
+/* تأكد من أن المحتوى الرئيسي مش مخفي */
+.main-content {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* Loading screen styles */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  position: relative;
+}
+
+.loading-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.loading-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-content p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.loading-subtitle {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
