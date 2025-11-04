@@ -105,38 +105,62 @@ const RewardsDashboard = ({ user, storageService }) => {
     }
   };
 
-  const completeTask = (taskId) => {
+  
+
+  const claimDailyLogin = () => {
+    const loginTask = dailyTasks.fconst completeTask = (taskId) => {
+  const task = dailyTasks.find(t => t.id === taskId);
+  if (task && user && !task.completed) {
+    // تحديث حالة المهمة أولاً
     setDailyTasks(tasks =>
-      tasks.map(task =>
-        task.id === taskId ? { ...task, completed: true } : task
+      tasks.map(t =>
+        t.id === taskId ? { ...t, completed: true } : t
       )
     );
 
-    const task = dailyTasks.find(t => t.id === taskId);
-    if (task && user) {
-      // تحديث النقاط
-      storageService.updatePoints(user.address, task.points);
-      
-      // تسجيل النشاط
-      storageService.saveActivity(user.address, {
-        type: task.type,
-        description: `Completed: ${task.title}`,
-        points: task.points
-      });
+    // تحديث النقاط في التخزين
+    const newPoints = storageService.updatePoints(user.walletAddress, task.points);
+    
+    // تسجيل النشاط
+    storageService.saveActivity(user.walletAddress, {
+      type: task.type,
+      description: `Completed: ${task.title}`,
+      points: task.points
+    });
 
-      // تحديث الواجهة
-      setUserData(prev => ({
-        ...prev,
-        points: prev.points + task.points
-      }));
+    // تحديث الواجهة
+    setUserData(prev => ({
+      ...prev,
+      points: newPoints
+    }));
 
-      // إعادة تحميل النشاطات
-      loadActivities();
+    // إعادة تحميل النشاطات
+    loadActivities();
+
+    // مكافأة streak إضافية
+    if (task.type === 'login') {
+      const userStreak = storageService.updateStreak(user.walletAddress);
+      if (userStreak % 7 === 0) {
+        const bonusPoints = 100;
+        storageService.updatePoints(user.walletAddress, bonusPoints);
+        storageService.saveActivity(user.walletAddress, {
+          type: 'bonus',
+          description: `Weekly streak bonus! ${userStreak} days`,
+          points: bonusPoints
+        });
+        
+        setUserData(prev => ({
+          ...prev,
+          points: prev.points + bonusPoints,
+          streak: userStreak
+        }));
+        loadActivities();
+      }
     }
-  };
-
-  const claimDailyLogin = () => {
-    const loginTask = dailyTasks.find(task => task.type === 'login');
+  }
+};
+    
+    ind(task => task.type === 'login');
     if (loginTask && !loginTask.completed) {
       completeTask(loginTask.id);
     }
