@@ -79,7 +79,7 @@ const RewardsDashboard = ({ user, storageService }) => {
   }, [user]);
 
   const loadUserData = () => {
-    const savedUser = storageService.getUser(user.address);
+    const savedUser = storageService.getUser(user.walletAddress);
     if (savedUser) {
       setUserData({
         points: savedUser.points || 0,
@@ -91,7 +91,7 @@ const RewardsDashboard = ({ user, storageService }) => {
   };
 
   const loadActivities = () => {
-    const activities = storageService.getActivities(user.address);
+    const activities = storageService.getActivities(user.walletAddress);
     setUserActivities(activities);
   };
 
@@ -105,62 +105,60 @@ const RewardsDashboard = ({ user, storageService }) => {
     }
   };
 
-  
+  const completeTask = (taskId) => {
+    const task = dailyTasks.find(t => t.id === taskId);
+    if (task && user && !task.completed) {
+      // تحديث حالة المهمة أولاً
+      setDailyTasks(tasks =>
+        tasks.map(t =>
+          t.id === taskId ? { ...t, completed: true } : t
+        )
+      );
 
-  const claimDailyLogin = () => {
-    const loginTask = dailyTasks.fconst completeTask = (taskId) => {
-  const task = dailyTasks.find(t => t.id === taskId);
-  if (task && user && !task.completed) {
-    // تحديث حالة المهمة أولاً
-    setDailyTasks(tasks =>
-      tasks.map(t =>
-        t.id === taskId ? { ...t, completed: true } : t
-      )
-    );
+      // تحديث النقاط في التخزين
+      const newPoints = storageService.updatePoints(user.walletAddress, task.points);
+      
+      // تسجيل النشاط
+      storageService.saveActivity(user.walletAddress, {
+        type: task.type,
+        description: `Completed: ${task.title}`,
+        points: task.points
+      });
 
-    // تحديث النقاط في التخزين
-    const newPoints = storageService.updatePoints(user.walletAddress, task.points);
-    
-    // تسجيل النشاط
-    storageService.saveActivity(user.walletAddress, {
-      type: task.type,
-      description: `Completed: ${task.title}`,
-      points: task.points
-    });
+      // تحديث الواجهة
+      setUserData(prev => ({
+        ...prev,
+        points: newPoints
+      }));
 
-    // تحديث الواجهة
-    setUserData(prev => ({
-      ...prev,
-      points: newPoints
-    }));
+      // إعادة تحميل النشاطات
+      loadActivities();
 
-    // إعادة تحميل النشاطات
-    loadActivities();
-
-    // مكافأة streak إضافية
-    if (task.type === 'login') {
-      const userStreak = storageService.updateStreak(user.walletAddress);
-      if (userStreak % 7 === 0) {
-        const bonusPoints = 100;
-        storageService.updatePoints(user.walletAddress, bonusPoints);
-        storageService.saveActivity(user.walletAddress, {
-          type: 'bonus',
-          description: `Weekly streak bonus! ${userStreak} days`,
-          points: bonusPoints
-        });
-        
-        setUserData(prev => ({
-          ...prev,
-          points: prev.points + bonusPoints,
-          streak: userStreak
-        }));
-        loadActivities();
+      // مكافأة streak إضافية
+      if (task.type === 'login') {
+        const userStreak = storageService.updateStreak(user.walletAddress);
+        if (userStreak % 7 === 0) {
+          const bonusPoints = 100;
+          storageService.updatePoints(user.walletAddress, bonusPoints);
+          storageService.saveActivity(user.walletAddress, {
+            type: 'bonus',
+            description: `Weekly streak bonus! ${userStreak} days`,
+            points: bonusPoints
+          });
+          
+          setUserData(prev => ({
+            ...prev,
+            points: prev.points + bonusPoints,
+            streak: userStreak
+          }));
+          loadActivities();
+        }
       }
     }
-  }
-};
-    
-    ind(task => task.type === 'login');
+  };
+
+  const claimDailyLogin = () => {
+    const loginTask = dailyTasks.find(task => task.type === 'login');
     if (loginTask && !loginTask.completed) {
       completeTask(loginTask.id);
     }
@@ -577,26 +575,26 @@ const RewardsDashboard = ({ user, storageService }) => {
               🔗 Make SVM Transaction
             </button>
 
-<button
-  onClick={() => {
-    console.log('All Users:', storageService.getAllUsers());
-    console.log('Current User:', user);
-    console.log('Activities:', storageService.getActivities(user.walletAddress));
-  }}
-  style={{
-    padding: '0.8rem 1rem',
-    background: '#6b7280',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '0.9rem',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textAlign: 'left'
-  }}
->
-  🔧 Debug Data
-</button>
+            <button
+              onClick={() => {
+                console.log('All Users:', storageService.getAllUsers());
+                console.log('Current User:', user);
+                console.log('Activities:', storageService.getActivities(user.walletAddress));
+              }}
+              style={{
+                padding: '0.8rem 1rem',
+                background: '#6b7280',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                textAlign: 'left'
+              }}
+            >
+              🔧 Debug Data
+            </button>
 
             <button
               style={{
@@ -643,5 +641,3 @@ const RewardsDashboard = ({ user, storageService }) => {
 };
 
 export default RewardsDashboard;
-
-        
