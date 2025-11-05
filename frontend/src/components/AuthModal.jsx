@@ -5,111 +5,94 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState('');
 
+  // محاكاة اتصال المحفظة
+  const simulateWalletConnection = (type) => {
+    return new Promise((resolve, reject) => {
+      setIsConnecting(true);
+      setError('');
+
+      setTimeout(() => {
+        // محاكاة نجاح الاتصال
+        const mockUserData = {
+          type: type,
+          address: `0x${Math.random().toString(16).substr(2, 40)}`,
+          network: type === 'evm' ? 'Ethereum Mainnet' : 'Solana Mainnet'
+        };
+        
+        resolve(mockUserData);
+      }, 1500);
+    });
+  };
+
+  const handleConnectWallet = async (walletType) => {
+    try {
+      const userData = await simulateWalletConnection(walletType);
+      onAuthSuccess(userData);
+    } catch (err) {
+      setError('Failed to connect wallet. Please try again.');
+      console.error('Wallet connection error:', err);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const walletOptions = {
+    evm: [
+      {
+        id: 'metamask',
+        name: 'MetaMask',
+        description: 'Connect using MetaMask',
+        icon: '🦊'
+      },
+      {
+        id: 'walletconnect',
+        name: 'WalletConnect',
+        description: 'Connect using WalletConnect',
+        icon: '🔗'
+      },
+      {
+        id: 'coinbase',
+        name: 'Coinbase Wallet',
+        description: 'Connect using Coinbase',
+        icon: '🏦'
+      }
+    ],
+    solana: [
+      {
+        id: 'phantom',
+        name: 'Phantom',
+        description: 'Connect using Phantom',
+        icon: '👻'
+      },
+      {
+        id: 'solflare',
+        name: 'Solflare',
+        description: 'Connect using Solflare',
+        icon: '🔥'
+      }
+    ]
+  };
+
   if (!isOpen) return null;
-
-  const connectEVM = async () => {
-    try {
-      setIsConnecting(true);
-      setError('');
-      
-      if (typeof window.ethereum !== 'undefined') {
-        console.log('MetaMask detected');
-        
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts'
-        });
-        
-        console.log('Connected account:', accounts[0]);
-        
-        // إرسال البيانات الأساسية فقط (بدون provider/signer)
-        onAuthSuccess({
-          type: 'evm',
-          address: accounts[0],
-          // لا نرسل provider أو signer لأنهم objects معقدة
-        });
-      } else {
-        setError('MetaMask not detected. Please install MetaMask.');
-        
-        const installMetaMask = confirm(
-          'MetaMask not found. Would you like to install it?'
-        );
-        if (installMetaMask) {
-          window.open('https://metamask.io/download.html', '_blank');
-        }
-      }
-    } catch (error) {
-      console.error('Error connecting EVM wallet:', error);
-      
-      if (error.code === 4001) {
-        setError('Connection rejected. Please approve the connection in MetaMask.');
-      } else {
-        setError('Failed to connect wallet. Please try again.');
-      }
-    } finally {
-      setIsConnecting(false);
-    }
-  };
-
-  const connectSolana = async () => {
-    try {
-      setIsConnecting(true);
-      setError('');
-      
-      const provider = window.solana || window.phantom;
-      
-      if (provider) {
-        console.log('Solana wallet detected');
-        
-        if (!provider.isConnected) {
-          await provider.connect();
-        }
-        
-        // إرسال البيانات الأساسية فقط
-        onAuthSuccess({
-          type: 'solana',
-          address: provider.publicKey.toString(),
-          // لا نرسل provider
-        });
-      } else {
-        setError('Phantom wallet not detected. Please install Phantom.');
-        
-        const installPhantom = confirm(
-          'Phantom wallet not found. Would you like to install it?'
-        );
-        if (installPhantom) {
-          window.open('https://phantom.app/', '_blank');
-        }
-      }
-    } catch (error) {
-      console.error('Error connecting Solana wallet:', error);
-      setError('Failed to connect Solana wallet. Please try again.');
-    } finally {
-      setIsConnecting(false);
-    }
-  };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Connect Wallet</h2>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h2>Connect Your Wallet</h2>
+          <button className="modal-close" onClick={onClose}>
+            ×
+          </button>
         </div>
 
-        {error && (
-          <div className="error-message">
-            ⚠️ {error}
-          </div>
-        )}
-
         <div className="modal-tabs">
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'evm' ? 'active' : ''}`}
             onClick={() => setActiveTab('evm')}
           >
             EVM Chains
           </button>
-          <button 
+          <button
             className={`tab-btn ${activeTab === 'solana' ? 'active' : ''}`}
             onClick={() => setActiveTab('solana')}
           >
@@ -118,53 +101,38 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
         </div>
 
         <div className="modal-body">
-          {activeTab === 'evm' && (
-            <div className="wallet-options">
-              <div className="wallet-option">
-                <div className="wallet-icon">🦊</div>
-                <div className="wallet-info">
-                  <h3>MetaMask</h3>
-                  <p>Connect to Ethereum and EVM chains</p>
-                  <div className="wallet-status">
-                    {typeof window.ethereum !== 'undefined' 
-                      ? '✅ Ready to connect' 
-                      : '❌ Not detected'
-                    }
-                  </div>
+          <div className="wallet-options">
+            {walletOptions[activeTab].map((wallet) => (
+              <div
+                key={wallet.id}
+                className="wallet-option"
+                onClick={() => handleConnectWallet(activeTab)}
+                style={{ cursor: isConnecting ? 'not-allowed' : 'pointer' }}
+              >
+                <div className="wallet-icon">
+                  {wallet.icon}
                 </div>
-                <button 
-                  className="btn btn-connect"
-                  onClick={connectEVM}
+                <div className="wallet-info">
+                  <h3>{wallet.name}</h3>
+                  <p>{wallet.description}</p>
+                </div>
+                <button
+                  className="btn-connect"
                   disabled={isConnecting}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConnectWallet(activeTab);
+                  }}
                 >
                   {isConnecting ? 'Connecting...' : 'Connect'}
                 </button>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {activeTab === 'solana' && (
-            <div className="wallet-options">
-              <div className="wallet-option">
-                <div className="wallet-icon">👻</div>
-                <div className="wallet-info">
-                  <h3>Phantom</h3>
-                  <p>Connect to Solana network</p>
-                  <div className="wallet-status">
-                    {(window.solana || window.phantom) 
-                      ? '✅ Ready to connect' 
-                      : '❌ Not detected'
-                    }
-                  </div>
-                </div>
-                <button 
-                  className="btn btn-connect"
-                  onClick={connectSolana}
-                  disabled={isConnecting}
-                >
-                  {isConnecting ? 'Connecting...' : 'Connect'}
-                </button>
-              </div>
+          {error && (
+            <div className="error-message">
+              {error}
             </div>
           )}
         </div>
