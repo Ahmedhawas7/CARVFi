@@ -283,12 +283,12 @@ function App() {
         {activeTab === 'protection' && <BotProtection user={user} />}
       </main>
 
-      {showAIChat && (
-        <AIChat 
-          user={user}
-          onClose={() => setShowAIChat(false)}
-        />
-      )}
+      {showAIAssistant && (
+  <AIAssistant 
+    user={user}
+    onClose={() => setShowAIAssistant(false)}
+  />
+)}
     </div>
   );
 }
