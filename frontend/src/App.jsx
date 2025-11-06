@@ -6,6 +6,7 @@ import UserProfile from './components/UserProfile';
 import AIChat from './components/AIChat';
 import RewardsDashboard from './components/RewardsDashboard';
 import BotProtection from './components/BotProtection';
+import StorageService from './services/StorageService';
 import './App.css';
 
 // نفس كود StorageService بتاعك بالضبط هنا ✅ (ما نغيروش)
