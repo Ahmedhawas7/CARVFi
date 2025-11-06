@@ -1,4 +1,3 @@
-// frontend/src/contexts/WalletContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import web3Service from '../services/web3Service';
 
