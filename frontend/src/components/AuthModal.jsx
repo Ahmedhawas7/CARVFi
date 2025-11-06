@@ -11,10 +11,8 @@ const AuthModal = ({ isOpen, onClose }) => {
     error, 
     connectWallet, 
     disconnectWallet,
-    isBackPackInstalled 
+    isWalletAvailable 
   } = useWallet();
-
-  const [activeTab, setActiveTab] = useState('connect');
 
   if (!isOpen) return null;
 
@@ -47,44 +45,38 @@ const AuthModal = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Tabs */}
-        {!isConnected && (
-          <div className="flex mb-6 border-b">
-            <button
-              className={`flex-1 py-3 font-semibold text-lg ${
-                activeTab === 'connect' 
-                  ? 'text-purple-600 border-b-2 border-purple-600' 
-                  : 'text-gray-500'
-              }`}
-              onClick={() => setActiveTab('connect')}
-            >
-              Connect
-            </button>
-          </div>
-        )}
-
         {/* Content */}
         <div className="space-y-6">
           {!isConnected ? (
             // Connect Wallet State
             <div>
-              {!isBackPackInstalled ? (
+              {!isWalletAvailable ? (
                 <div className="text-center space-y-4">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
                     <span className="text-2xl">⚠️</span>
                   </div>
-                  <p className="text-red-600 text-lg font-semibold">BackPack Wallet Not Installed</p>
+                  <p className="text-red-600 text-lg font-semibold">No Wallet Found</p>
                   <p className="text-gray-600 mb-4">
-                    Please install BackPack wallet to use CARVFi on Carv SVM network
+                    Please install a Solana wallet like BackPack, Phantom, or Solflare to use CARVFi
                   </p>
-                  <a 
-                    href="https://www.backpack.app/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-block bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
-                  >
-                    Download BackPack
-                  </a>
+                  <div className="grid grid-cols-2 gap-3">
+                    <a 
+                      href="https://www.backpack.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors text-center"
+                    >
+                      BackPack
+                    </a>
+                    <a 
+                      href="https://phantom.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors text-center"
+                    >
+                      Phantom
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -94,9 +86,9 @@ const AuthModal = ({ isOpen, onClose }) => {
                         <span className="text-xl">🎒</span>
                       </div>
                       <div>
-                        <h3 className="font-bold text-gray-900 text-lg">BackPack Wallet</h3>
+                        <h3 className="font-bold text-gray-900 text-lg">Solana Wallet</h3>
                         <p className="text-gray-600">
-                          Connect to your BackPack wallet for Carv SVM
+                          Connect your Solana wallet for Carv SVM
                         </p>
                       </div>
                     </div>
@@ -114,7 +106,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                   <button
                     onClick={handleConnect}
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all transform hover:scale-105 disabled:scale-100"
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
@@ -122,7 +114,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                         Connecting...
                       </div>
                     ) : (
-                      'Connect BackPack Wallet'
+                      'Connect Wallet'
                     )}
                   </button>
                 </div>
@@ -176,13 +168,6 @@ const AuthModal = ({ isOpen, onClose }) => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">
-            By connecting your wallet, you agree to our Terms of Service and Privacy Policy
-          </p>
         </div>
       </div>
     </div>
