@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useWallet } from '../contexts/WalletContext';
 
 const AuthModal = ({ isOpen, onClose, onAuthSuccess, walletAddress }) => {
@@ -20,6 +20,16 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, walletAddress }) => {
   // إذا كان فيه walletAddress يبقي المستخدم متصل بالمحفظة وبيسجل بياناته الإضافية
   const isProfileCompletion = !!walletAddress;
 
+  // توليد username تلقائي عند فتح المودال
+  useEffect(() => {
+    if (isProfileCompletion && isOpen && !username) {
+      const randomNum = Math.floor(Math.random() * 10000);
+      const newUsername = `user_${randomNum}`;
+      setUsername(newUsername);
+      console.log('🎲 Auto-generated username:', newUsername);
+    }
+  }, [isProfileCompletion, isOpen, username]);
+
   if (!isOpen) return null;
 
   const handleWalletConnect = async (walletType) => {
@@ -40,15 +50,19 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess, walletAddress }) => {
     e.preventDefault();
     
     console.log('📝 Submitting profile data:', { username, profileData });
+    console.log('🎯 Calling onAuthSuccess with wallet:', walletAddress);
     
     if (onAuthSuccess) {
       onAuthSuccess({
         address: walletAddress,
         type: 'solana',
-        username: username || `user_${walletAddress.slice(2, 8)}`,
+        username: username,
         displayName: profileData.displayName,
         bio: profileData.bio
       });
+      console.log('✅ onAuthSuccess called successfully');
+    } else {
+      console.error('❌ onAuthSuccess is not defined!');
     }
     
     onClose();
