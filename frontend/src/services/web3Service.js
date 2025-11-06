@@ -16,35 +16,19 @@ export class CarvWeb3Service {
   }
 
   getAvailableWallets() {
-    const wallets = [];
-    
-    if (typeof window !== 'undefined') {
-      if (window.backpack) {
-        wallets.push({ name: 'BackPack', type: 'injected', icon: '🎒' });
-      }
-      if (window.solana) {
-        wallets.push({ name: 'Solana', type: 'injected', icon: '🔷' });
-      }
-      if (window.phantom) {
-        wallets.push({ name: 'Phantom', type: 'injected', icon: '👻' });
-      }
-    }
-    
-    // Always show BackPack for demo
-    if (wallets.length === 0) {
-      wallets.push({ name: 'BackPack', type: 'injected', icon: '🎒' });
-    }
-    
-    return wallets;
+    return [
+      { name: 'BackPack', type: 'injected', icon: '🎒' },
+      { name: 'Phantom', type: 'injected', icon: '👻' }
+    ];
   }
 
   async connectWallet(walletType = 'backpack') {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     this.isConnected = true;
     this.currentProvider = walletType;
     this.publicKey = 'Ckpc8hRJ' + Math.random().toString(36).substr(2, 9) + 'GzWCeM';
+    this.balance = (Math.random() * 10).toFixed(4);
     
     return {
       success: true,
@@ -55,10 +39,6 @@ export class CarvWeb3Service {
   }
 
   async getBalance() {
-    if (!this.isConnected) {
-      throw new Error('Wallet not connected');
-    }
-    
     this.balance = (Math.random() * 10).toFixed(4);
     return this.balance;
   }
@@ -82,7 +62,7 @@ export class CarvWeb3Service {
   }
 
   isAnyWalletAvailable() {
-    return this.getAvailableWallets().length > 0;
+    return true;
   }
 }
 
