@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import web3Service from '../services/web3Service';
+import solanaService from '../services/web3Service';
 
 const WalletContext = createContext();
 
@@ -13,7 +13,7 @@ export const useWallet = () => {
 
 export const WalletProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [account, setAccount] = useState(null);
+  const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -24,14 +24,14 @@ export const WalletProvider = ({ children }) => {
   }, []);
 
   const checkInitialConnection = async () => {
-    if (web3Service.isMetaMaskInstalled() && web3Service.isConnected) {
-      const status = web3Service.getConnectionStatus();
-      setIsConnected(status.isConnected);
-      setAccount(status.address);
+    const status = solanaService.getConnectionStatus();
+    if (status.isConnected) {
+      setIsConnected(true);
+      setPublicKey(status.publicKey);
       
       try {
-        const accountBalance = await web3Service.getBalance();
-        setBalance(accountBalance);
+        const accountBalance = await solanaService.getBalance();
+        setBalance(accountBalance.toString());
       } catch (error) {
         console.error('Failed to get balance:', error);
       }
@@ -44,15 +44,15 @@ export const WalletProvider = ({ children }) => {
     setError(null);
     
     try {
-      const result = await web3Service.connectWallet();
+      const result = await solanaService.connectWallet();
       
       if (result.success) {
         setIsConnected(true);
-        setAccount(result.address);
+        setPublicKey(result.publicKey);
         
         // Get initial balance
-        const accountBalance = await web3Service.getBalance();
-        setBalance(accountBalance);
+        const accountBalance = await solanaService.getBalance();
+        setBalance(accountBalance.toString());
       }
     } catch (error) {
       setError(error.message);
@@ -64,55 +64,35 @@ export const WalletProvider = ({ children }) => {
 
   // Disconnect wallet function
   const disconnectWallet = () => {
-    web3Service.disconnectWallet();
+    solanaService.disconnectWallet();
     setIsConnected(false);
-    setAccount(null);
+    setPublicKey(null);
     setBalance('0');
     setError(null);
   };
 
   // Refresh balance
   const refreshBalance = async () => {
-    if (isConnected && account) {
+    if (isConnected && publicKey) {
       try {
-        const accountBalance = await web3Service.getBalance();
-        setBalance(accountBalance);
+        const accountBalance = await solanaService.getBalance();
+        setBalance(accountBalance.toString());
       } catch (error) {
         console.error('Failed to refresh balance:', error);
       }
     }
   };
 
-  // Listen for account changes
-  useEffect(() => {
-    const handleAccountChange = (event) => {
-      setAccount(event.detail.address);
-      refreshBalance();
-    };
-
-    const handleWalletDisconnected = () => {
-      disconnectWallet();
-    };
-
-    window.addEventListener('accountChanged', handleAccountChange);
-    window.addEventListener('walletDisconnected', handleWalletDisconnected);
-
-    return () => {
-      window.removeEventListener('accountChanged', handleAccountChange);
-      window.removeEventListener('walletDisconnected', handleWalletDisconnected);
-    };
-  }, []);
-
   const value = {
     isConnected,
-    account,
+    publicKey,
     balance,
     isLoading,
     error,
     connectWallet,
     disconnectWallet,
     refreshBalance,
-    isMetaMaskInstalled: web3Service.isMetaMaskInstalled()
+    isBackPackInstalled: solanaService.isBackPackInstalled()
   };
 
   return (
