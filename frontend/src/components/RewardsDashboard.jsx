@@ -100,6 +100,7 @@ const RewardsDashboard = ({ user }) => {
       loadActivities();
       checkDailyLogin();
     } else {
+      // إذا لم يكن هناك مستخدم، ارجع للصفحة الرئيسية
       navigate('/');
     }
   }, [user, navigate]);
@@ -120,8 +121,8 @@ const RewardsDashboard = ({ user }) => {
   const loadActivities = () => {
     try {
       const activities = JSON.parse(localStorage.getItem('carvfi_activities') || '{}');
-      const userKey = user?.email?.toLowerCase() || user?.walletAddress?.toLowerCase();
-      if (userKey && activities[userKey]) {
+      const userKey = user?.walletAddress?.toLowerCase();
+      if (activities[userKey]) {
         setUserActivities(activities[userKey]);
       }
     } catch (error) {
@@ -147,13 +148,23 @@ const RewardsDashboard = ({ user }) => {
         )
       );
 
-      const currentUser = JSON.parse(localStorage.getItem('carvfi_current_user') || 'null');
-      if (currentUser) {
-        currentUser.points = (currentUser.points || 0) + task.points;
-        currentUser.lastUpdated = new Date().toISOString();
-        localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
+      // استخدام نفس نظام تحديث النقاط الموجود في App.jsx
+      const users = JSON.parse(localStorage.getItem('carvfi_users') || '{}');
+      const userKey = user.walletAddress?.toLowerCase();
+      
+      if (users[userKey]) {
+        users[userKey].points = (users[userKey].points || 0) + task.points;
+        users[userKey].lastUpdated = new Date().toISOString();
+        localStorage.setItem('carvfi_users', JSON.stringify(users));
+        
+        const currentUser = JSON.parse(localStorage.getItem('carvfi_current_user') || 'null');
+        if (currentUser && currentUser.walletAddress?.toLowerCase() === userKey) {
+          currentUser.points = users[userKey].points;
+          localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
+        }
       }
 
+      // حفظ النشاط
       saveActivity({
         type: task.type,
         description: `Completed: ${task.title}`,
@@ -174,31 +185,45 @@ const RewardsDashboard = ({ user }) => {
   };
 
   const updateStreak = () => {
-    const currentUser = JSON.parse(localStorage.getItem('carvfi_current_user') || 'null');
-
-    if (currentUser) {
+    const users = JSON.parse(localStorage.getItem('carvfi_users') || '{}');
+    const userKey = user?.walletAddress?.toLowerCase();
+    
+    if (users[userKey]) {
       const today = new Date().toDateString();
-      const lastLogin = currentUser.lastLogin ? new Date(currentUser.lastLogin).toDateString() : null;
-
+      const lastLogin = users[userKey].lastLogin ? new Date(users[userKey].lastLogin).toDateString() : null;
+      
       if (lastLogin !== today) {
-        currentUser.streak = (currentUser.streak || 0) + 1;
-        currentUser.lastLogin = new Date().toISOString();
-        currentUser.loginCount = (currentUser.loginCount || 0) + 1;
-        currentUser.lastUpdated = new Date().toISOString();
-        localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
+        users[userKey].streak = (users[userKey].streak || 0) + 1;
+        users[userKey].lastLogin = new Date().toISOString();
+        users[userKey].loginCount = (users[userKey].loginCount || 0) + 1;
+        users[userKey].lastUpdated = new Date().toISOString();
+        localStorage.setItem('carvfi_users', JSON.stringify(users));
+        
+        const currentUser = JSON.parse(localStorage.getItem('carvfi_current_user') || 'null');
+        if (currentUser && currentUser.walletAddress?.toLowerCase() === userKey) {
+          currentUser.streak = users[userKey].streak;
+          currentUser.lastLogin = users[userKey].lastLogin;
+          currentUser.loginCount = users[userKey].loginCount;
+          localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
+        }
 
-        const userStreak = currentUser.streak;
+        const userStreak = users[userKey].streak;
         if (userStreak % 7 === 0) {
           const bonusPoints = 100;
-          currentUser.points = (currentUser.points || 0) + bonusPoints;
-          localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
-
+          users[userKey].points = (users[userKey].points || 0) + bonusPoints;
+          localStorage.setItem('carvfi_users', JSON.stringify(users));
+          
+          if (currentUser && currentUser.walletAddress?.toLowerCase() === userKey) {
+            currentUser.points = users[userKey].points;
+            localStorage.setItem('carvfi_current_user', JSON.stringify(currentUser));
+          }
+          
           saveActivity({
             type: 'bonus',
             description: `Weekly streak bonus! ${userStreak} days`,
             points: bonusPoints
           });
-
+          
           setUserData(prev => ({
             ...prev,
             points: (prev.points || 0) + bonusPoints,
@@ -212,22 +237,20 @@ const RewardsDashboard = ({ user }) => {
 
   const saveActivity = (activity) => {
     const activities = JSON.parse(localStorage.getItem('carvfi_activities') || '{}');
-    const userKey = user?.email?.toLowerCase() || user?.walletAddress?.toLowerCase();
-
-    if (userKey) {
-      if (!activities[userKey]) {
-        activities[userKey] = [];
-      }
-
-      activities[userKey].unshift({
-        id: Date.now().toString(),
-        ...activity,
-        timestamp: new Date().toISOString()
-      });
-
-      activities[userKey] = activities[userKey].slice(0, 50);
-      localStorage.setItem('carvfi_activities', JSON.stringify(activities));
+    const userKey = user?.walletAddress?.toLowerCase();
+    
+    if (!activities[userKey]) {
+      activities[userKey] = [];
     }
+    
+    activities[userKey].unshift({
+      id: Date.now().toString(),
+      ...activity,
+      timestamp: new Date().toISOString()
+    });
+    
+    activities[userKey] = activities[userKey].slice(0, 50);
+    localStorage.setItem('carvfi_activities', JSON.stringify(activities));
   };
 
   const claimDailyLogin = () => {
